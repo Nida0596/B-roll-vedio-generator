@@ -6,6 +6,8 @@ import tempfile
 import asyncio
 import requests
 import google.generativeai as genai
+import edge_tts  # Moved to top so cloud platforms know to install it
+import moviepy.video.fx.all as vfx  # Added to fix the broken loop bug
 from moviepy.editor import VideoFileClip, AudioFileClip, concatenate_videoclips
 
 # --- 1. SECURE CREDENTIAL CONFIGURATION ---
@@ -68,7 +70,6 @@ def extract_broll_download_url(tags):
     return "https://player.vimeo.com/external/371433846.sd.mp4?s=236da2f3c0227ee0e980562e6e1694f4b16757d5&profile_id=139&oauth2_token_id=57447761"
 
 async def generate_narration(text, save_path):
-    import edge_tts
     communication_channel = edge_tts.Communicate(text, "en-US-JennyNeural", rate="+0%")
     await communication_channel.save(save_path)
 
@@ -121,7 +122,8 @@ if trigger_render and word_count > 0:
             
             video_layer = VideoFileClip(local_clip_path).resize((1280, 720))
             if video_layer.duration < audio_duration:
-                video_layer = video_layer.loop(duration=audio_duration)
+                # FIXED: Using the bulletproof vfx.loop method instead of video_layer.loop
+                video_layer = vfx.loop(video_layer, duration=audio_duration)
             else:
                 video_layer = video_layer.subclip(0, audio_duration)
                 
