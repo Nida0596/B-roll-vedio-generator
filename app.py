@@ -6,8 +6,7 @@ import tempfile
 import asyncio
 import requests
 import google.generativeai as genai
-import edge_tts  # Moved to top so cloud platforms know to install it
-import moviepy.video.fx.all as vfx  # Added to fix the broken loop bug
+import edge_tts 
 from moviepy.editor import VideoFileClip, AudioFileClip, concatenate_videoclips
 
 # --- 1. SECURE CREDENTIAL CONFIGURATION ---
@@ -122,8 +121,9 @@ if trigger_render and word_count > 0:
             
             video_layer = VideoFileClip(local_clip_path).resize((1280, 720))
             if video_layer.duration < audio_duration:
-                # FIXED: Using the bulletproof vfx.loop method instead of video_layer.loop
-                video_layer = vfx.loop(video_layer, duration=audio_duration)
+                # VERSION-SAFE FIX: Uses the generic .fx wrapper method to avoid internal module mismatches
+                from moviepy.video.fx.loop import loop
+                video_layer = video_layer.fx(loop, duration=audio_duration)
             else:
                 video_layer = video_layer.subclip(0, audio_duration)
                 
