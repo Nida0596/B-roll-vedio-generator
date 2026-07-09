@@ -1,5 +1,6 @@
-streamlit
-requests
+gradio>=4.44.0
 google-generativeai
-moviepy
-edge-tts
+requests
+gTTS
+ffmpeg-python
+supabase
